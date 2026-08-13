@@ -16,6 +16,7 @@ import {
 } from '../server/db/checks.js';
 import { getSettings } from '../server/db/settings.js';
 import { setLastStrategy, updateWatch } from '../server/db/watches.js';
+import { IMPLAUSIBLE_PRICE_FACTOR } from './constants.js';
 import { dispatchAlert } from './channels/index.js';
 import { evaluateTrigger, shouldSendFailureAlert } from './trigger.js';
 import { asScrapeError, fetchPage, fetchPageWithRetry, ScrapeError } from './scraper/fetch.js';
@@ -53,6 +54,9 @@ export async function runCheck(watch: Watch, options: RunCheckOptions = {}): Pro
       throw new ScrapeError('not_found', 'The page loaded, but no price was found on it.');
     }
 
+    const implausible = implausibleJump(watch.id, extracted.price);
+    if (implausible) throw new ScrapeError('not_found', implausible);
+
     const check = recordCheck({
       watch_id: watch.id,
       price: extracted.price,
@@ -79,6 +83,39 @@ export async function runCheck(watch: Watch, options: RunCheckOptions = {}): Pro
     await maybeAlertFailure(watch, check, scrapeError);
     return check;
   }
+}
+
+/**
+ * Guards against the extractor latching onto the wrong number. Returns an
+ * explanation when the new price is wildly out of line with the last known good one,
+ * or null when it is believable.
+ *
+ * Recording it as a failed check rather than a successful one is the point: a failed
+ * check never alerts and never re-arms the trigger, so a single misread cannot email
+ * the user a phantom price drop, and the history chart stays honest.
+ */
+function implausibleJump(watchId: number, price: number | null): string | null {
+  if (price === null || price <= 0) return null;
+
+  // Self-healing: once the reading has been rejected twice in a row it is not a
+  // one-off glitch — the store really did change, or PriceWatch was reading the
+  // wrong element before and has since been fixed. Believe the page and move on,
+  // rather than staying wedged on a stale baseline forever. Two rejections also sit
+  // just under the three-failure threshold, so the guard never triggers an email.
+  if (consecutiveFailures(watchId) >= 2) return null;
+
+  const previous = lastSuccessfulCheckBefore(watchId, Number.MAX_SAFE_INTEGER);
+  const last = previous?.price ?? null;
+  if (last === null || last <= 0) return null;
+
+  const ratio = price > last ? price / last : last / price;
+  if (ratio < IMPLAUSIBLE_PRICE_FACTOR) return null;
+
+  return (
+    `Found ${price}, but the last good reading was ${last} — a ${Math.round(ratio)}x change. ` +
+    'Treating this as a misread rather than a real price. If the price really did ' +
+    'change this much, set a CSS selector override to point at it directly.'
+  );
 }
 
 /** Caches the winning strategy and backfills an empty label from the page title. */

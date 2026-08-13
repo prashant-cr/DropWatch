@@ -1,0 +1,48 @@
+<!doctype html>
+<!--
+  A distilled reproduction of the marketplace layout that broke detection in the
+  wild (Amazon.in, but Flipkart, eBay and Walmart share the shape):
+
+    - An add-on warranty and an accessory price appear in the markup BEFORE the
+      product's own price, so any "earliest wins" rule picks the upsell.
+    - The real price is stated several times: an accessible off-screen span, a
+      hidden form input, and the visible digits split across nested spans.
+    - A financing figure in Indian lakh grouping is the largest number on the
+      page, so any "largest wins" rule picks that instead.
+
+  The correct answer is 14499. Consensus finds it: 14,499 is claimed by four
+  independent elements, every decoy by one.
+-->
+<html lang="en">
+  <head>
+    <title>Elica 60cm Kitchen Chimney - Home Store</title>
+  </head>
+  <body>
+    <h1>Elica 60cm 1500 m3/hr Filterless Autoclean Kitchen Chimney</h1>
+
+    <div class="attach-warranty-price a-color-price">₹649.00</div>
+    <div class="attach-accessory-price">₹1,349.00</div>
+
+    <div id="corePrice">
+      <input
+        type="hidden"
+        name="items[0.base][customerVisiblePrice][amount]"
+        value="14499.00"
+      />
+      <span class="a-price apex-pricetopay-value">
+        <span class="a-offscreen">₹14,499.00</span>
+        <span aria-hidden="true">
+          <span class="a-price-symbol">₹</span>
+          <span class="a-price-whole">14,499<span class="a-price-decimal">.</span></span>
+          <span class="a-price-fraction">00</span>
+        </span>
+      </span>
+    </div>
+
+    <div class="emi-price-total">EMI total ₹21,98,900</div>
+    <div class="savings-price">You save ₹5,500.00</div>
+
+    <p>In stock</p>
+    <button>Add to cart</button>
+  </body>
+</html>

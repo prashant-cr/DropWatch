@@ -170,6 +170,29 @@ describe('failureAlertSentSinceLastSuccess', () => {
   });
 });
 
+describe('lastSuccessfulCheckBefore as a "latest good price" lookup', () => {
+  // How the checker's implausible-jump guard finds its baseline.
+  const latestGood = () => lastSuccessfulCheckBefore(watchId, Number.MAX_SAFE_INTEGER);
+
+  it('returns the most recent successful price', () => {
+    ok(120);
+    ok(95);
+    expect(latestGood()?.price).toBe(95);
+  });
+
+  it('is unaffected by later failures', () => {
+    ok(95);
+    fail();
+    fail();
+    expect(latestGood()?.price).toBe(95);
+  });
+
+  it('is null when nothing has ever succeeded', () => {
+    fail();
+    expect(latestGood()).toBeNull();
+  });
+});
+
 describe('priceHistory', () => {
   it('returns successful checks oldest first and omits failures', () => {
     ok(120);

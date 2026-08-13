@@ -38,7 +38,7 @@ const NAMED_ENTITIES: Record<string, string> = {
   gt: '>',
   quot: '"',
   apos: "'",
-  nbsp: ' ',
+  nbsp: '\u00a0',
   euro: '€',
   pound: '£',
   yen: '¥',
@@ -78,9 +78,16 @@ export function stripNonVisible(html: string): string {
     .replace(/<!--[\s\S]*?-->/g, ' ');
 }
 
+/**
+ * Collapses runs of ordinary whitespace but leaves no-break and thin spaces intact —
+ * those carry meaning inside a price ("1 299") and must reach
+ * {@link normalizeSpacing} undamaged. JavaScript's `\s` would eat them.
+ */
+const ASCII_WHITESPACE = /[ \t\n\r\f\v]+/g;
+
 export function stripTags(html: string): string {
   return decodeEntities(html.replace(/<[^>]*>/g, ' '))
-    .replace(/\s+/g, ' ')
+    .replace(ASCII_WHITESPACE, ' ')
     .trim();
 }
 
@@ -164,8 +171,6 @@ const CURRENCY_CODES = new Set([
  * ambiguity between US ("1,234.50") and European ("1.234,50") conventions.
  */
 export function normalizeNumber(raw: string): number | null {
-  // \u00a0 and \u202f are the no-break and narrow-no-break spaces used as digit
-  // group separators in French and Scandinavian price formatting.
   let text = raw.replace(/[\s\u00a0\u202f']/g, '');
   if (!/\d/.test(text)) return null;
 
@@ -199,14 +204,42 @@ export interface Money {
   index: number;
 }
 
-const NUMBER_PATTERN = /\d[\d.,\u00a0\u202f\s']*\d|\d/g;
+/**
+ * Deliberately contains no `\s`. Allowing whitespace inside a number lets two
+ * unrelated prices that sit next to each other ("₹649.00 ₹1,349.00") merge into a
+ * single enormous bogus figure. Spacing that genuinely belongs inside one number is
+ * repaired by {@link normalizeSpacing} before this pattern ever runs.
+ */
+const NUMBER_PATTERN = /\d[\d.,']*\d|\d/g;
+
+/** No-break, narrow-no-break and thin spaces — the typographic group separators. */
+const TYPO_SPACE = '\u00a0\u202f\u2009';
+
+const SPLIT_DECIMAL = new RegExp(`(\\d)[${TYPO_SPACE} ]*([.,])[${TYPO_SPACE} ]*(\\d)`, 'g');
+const SPACED_THOUSANDS = new RegExp(`(\\d)[${TYPO_SPACE}](\\d{3})(?!\\d)`, 'g');
+
+/**
+ * Repairs whitespace that belongs *inside* a single number, letting the number
+ * pattern itself stay strict:
+ *
+ *  - Retailers split a price across elements — `<span>14,499</span><span>.</span>
+ *    <span>00</span>` — and stripping the tags leaves `"14,499 . 00"`. Spacing that
+ *    hugs a decimal separator is closed up.
+ *  - French and Scandinavian sites group thousands with a no-break space
+ *    (`"10 999"`). Only the typographic spaces are joined, never a plain one, so
+ *    prose like "Save 20 000" cannot fuse into a price.
+ */
+export function normalizeSpacing(text: string): string {
+  return text.replace(SPLIT_DECIMAL, '$1$2$3').replace(SPACED_THOUSANDS, '$1$2');
+}
 
 /**
  * Finds currency-formatted numbers in free text. A number only counts as money if a
  * currency symbol or ISO code sits immediately before or after it — this is what
  * keeps review counts, model numbers and years out of the results.
  */
-export function findMoney(text: string): Money[] {
+export function findMoney(input: string): Money[] {
+  const text = normalizeSpacing(input);
   const results: Money[] = [];
   NUMBER_PATTERN.lastIndex = 0;
 
@@ -239,7 +272,7 @@ export function findMoney(text: string): Money[] {
 
 /** Parses a single price string such as `"$1,299.00"` or `"1.299,00 €"`. */
 export function parseMoney(text: string): Money | null {
-  const clean = decodeEntities(text).replace(/\s+/g, ' ').trim();
+  const clean = normalizeSpacing(decodeEntities(text).replace(ASCII_WHITESPACE, ' ').trim());
   const withCurrency = findMoney(clean);
   if (withCurrency[0]) return withCurrency[0];
 
@@ -553,10 +586,15 @@ const microdata: Strategy = {
 const POSITIVE_TOKENS = ['price', 'preis', 'prix', 'precio', 'prezzo', 'amount', 'money', 'cost'];
 
 /**
- * Tokens that mark a *different* price — the crossed-out original, a per-unit
- * figure, a filter widget. Matching one disqualifies the candidate outright.
+ * Tokens that mark a *different* price — the crossed-out original, an add-on, a
+ * per-unit figure, a filter widget. Matching one disqualifies the candidate.
+ *
+ * The add-on group matters more than it looks: marketplace pages inject warranty and
+ * accessory offers into the markup *above* the product's own price, so without these
+ * the cheapest upsell on the page wins.
  */
 const NEGATIVE_TOKENS = [
+  // A different price for the same product
   'old',
   'was',
   'strike',
@@ -568,76 +606,179 @@ const NEGATIVE_TOKENS = [
   'regular',
   'original',
   'range',
-  'filter',
+  'per-unit',
+  'unit-price',
+  'history',
+  // A price for something that is not this product
+  'warranty',
+  'accessory',
+  'accessories',
+  'attach',
+  'addon',
+  'add-on',
+  'protection',
+  'insurance',
+  'bundle',
+  'gift',
+  'related',
+  'similar',
+  'recommend',
+  'sponsored',
+  'upsell',
+  'cross-sell',
+  // Not a purchase price at all
   'shipping',
   'delivery',
   'tax',
   'saving',
   'discount',
-  'per-unit',
-  'unit-price',
+  'coupon',
+  'cashback',
+  'reward',
+  'exchange',
+  'trade-in',
+  'emi',
   'installment',
+  'instalment',
   'monthly',
+  'per-month',
   'subscription',
-  'history',
+  'filter',
   'total',
   'subtotal',
+  'cart',
+  'basket',
 ];
 
 /** Tokens that make a candidate more likely to be the live selling price. */
-const BONUS_TOKENS = ['sale', 'current', 'now', 'final', 'our-price', 'product-price', 'sales'];
+const BONUS_TOKENS = [
+  'sale',
+  'current',
+  'now',
+  'final',
+  'our-price',
+  'product-price',
+  'sales',
+  'selling',
+  'offer-price',
+  'pricetopay',
+  'topay',
+  'main',
+  'primary',
+  'hero',
+];
 
-/** Common price-bearing class/id/data attributes, scored and ranked. */
+interface PriceCandidate {
+  money: Money;
+  score: number;
+  position: number;
+}
+
+/** Attributes worth searching for price-ish naming. */
+const SEARCHABLE_ATTRS = [
+  'class',
+  'id',
+  'itemprop',
+  'data-testid',
+  'data-test',
+  'data-qa',
+  'data-price-type',
+  'data-price',
+  'name',
+];
+
+/**
+ * Groups candidates by value and returns the winner by *consensus*.
+ *
+ * This is the load-bearing idea, and it is what makes the strategy work on stores it
+ * has never seen. A product page states its real price several times over — an
+ * accessible off-screen span, the visible digits split across elements, a hidden form
+ * input, a data attribute — while a decoy (an upsell, a delivery fee, a crossed-out
+ * original) usually appears once or twice. Counting how many independent elements
+ * agree on a number is a far better signal than any per-site class name, and unlike a
+ * position rule it does not care where in the markup the real price sits.
+ */
+function pickByConsensus(candidates: PriceCandidate[]): PriceCandidate | null {
+  if (candidates.length === 0) return null;
+
+  const groups = new Map<number, { votes: number; best: PriceCandidate; bestScore: number }>();
+  for (const candidate of candidates) {
+    const key = Math.round(candidate.money.value * 100);
+    const group = groups.get(key);
+    if (!group) {
+      groups.set(key, { votes: 1, best: candidate, bestScore: candidate.score });
+      continue;
+    }
+    group.votes += 1;
+    if (candidate.score > group.bestScore) {
+      group.bestScore = candidate.score;
+      group.best = candidate;
+    }
+  }
+
+  // Agreement is worth a lot, but it saturates: past a handful of mentions an extra
+  // repetition says nothing new, and attribute quality should still break ties.
+  const ranked = [...groups.values()]
+    .map((group) => ({
+      candidate: group.best,
+      total: group.bestScore + Math.min(group.votes, 6) * 4,
+    }))
+    .sort((a, b) => b.total - a.total || a.candidate.position - b.candidate.position);
+
+  return ranked[0]?.candidate ?? null;
+}
+
+/** Common price-bearing class/id/data attributes, scored and ranked by consensus. */
 const commonSelectors: Strategy = {
   name: 'common-selectors',
   run(snapshot) {
     const html = stripNonVisible(snapshot.html);
-    const candidates: Array<{ money: Money; score: number; position: number }> = [];
+    const candidates: PriceCandidate[] = [];
 
     for (const match of html.matchAll(/<([a-z0-9-]+)\b([^>]*)>/gi)) {
       const attrs = match[2] ?? '';
-      const searchable = (
-        [
-          attrValue(attrs, 'class'),
-          attrValue(attrs, 'id'),
-          attrValue(attrs, 'itemprop'),
-          attrValue(attrs, 'data-testid'),
-          attrValue(attrs, 'data-test'),
-          attrValue(attrs, 'data-qa'),
-          attrValue(attrs, 'data-price-type'),
-        ]
-          .filter(Boolean)
-          .join(' ') || ''
-      ).toLowerCase();
+      const searchable = SEARCHABLE_ATTRS.map((name) => attrValue(attrs, name))
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
 
       if (!searchable) continue;
       if (!POSITIVE_TOKENS.some((token) => searchable.includes(token))) continue;
       if (NEGATIVE_TOKENS.some((token) => searchable.includes(token))) continue;
 
       const tagStart = match.index ?? 0;
-      const inner = stripTags(
-        html.slice(tagStart + match[0].length, tagStart + match[0].length + 250),
-      );
-      const money = parseMoney(inner);
-      if (!money || money.currency === null) continue;
+      // `content` and `value` carry the price on <meta> and hidden <input> elements,
+      // which have no inner text at all; otherwise read the text that follows.
+      const own = attrValue(attrs, 'content') ?? attrValue(attrs, 'value');
+      const money = own
+        ? parseMoney(own)
+        : parseMoney(
+            stripTags(html.slice(tagStart + match[0].length, tagStart + match[0].length + 250)),
+          );
+
+      // A bare number in `content`/`value` is trustworthy because the attribute is
+      // explicitly a price; free text must carry a currency marker to count.
+      if (!money) continue;
+      if (!own && money.currency === null) continue;
+      if (money.value <= 0) continue;
 
       let score = 10;
       if (BONUS_TOKENS.some((token) => searchable.includes(token))) score += 5;
       if (searchable.includes('price')) score += 2;
-      // Earlier in the document is more likely to be the hero price.
-      score -= Math.min(5, Math.floor(tagStart / Math.max(1, html.length / 10)));
+      if (own) score += 3;
 
       candidates.push({ money, score, position: tagStart });
     }
 
-    if (candidates.length === 0) return null;
-    candidates.sort((a, b) => b.score - a.score || a.position - b.position);
-    const best = candidates[0];
+    const best = pickByConsensus(candidates);
     if (!best) return null;
 
     return {
       price: best.money.value,
-      currency: best.money.currency,
+      // A machine-readable attribute may omit the symbol; fall back to whatever
+      // currency the rest of the candidates agreed on.
+      currency:
+        best.money.currency ?? candidates.find((c) => c.money.currency)?.money.currency ?? null,
       available: availabilityFromText(visibleText(snapshot.html)),
       title: null,
       strategy: 'common-selectors',
@@ -646,9 +787,13 @@ const commonSelectors: Strategy = {
 };
 
 /**
- * Last resort: the largest currency-formatted number in the top of the page. Crude,
- * but it rescues pages with no structured data at all, and the add-watch flow always
- * shows the detected value for the user to confirm.
+ * Last resort for pages with no structured data and no price-ish attributes: the
+ * most-repeated currency-formatted number near the top of the page.
+ *
+ * The original design took the *largest* such number. That turned out to be actively
+ * harmful — the biggest figure on a page is typically a financing total, a bulk price
+ * or an unrelated item — so this uses the same consensus rule as the selector
+ * strategy, falling back to the earliest occurrence when nothing repeats.
  */
 const topOfPageHeuristic: Strategy = {
   name: 'heuristic',
@@ -658,10 +803,14 @@ const topOfPageHeuristic: Strategy = {
     const money = findMoney(topRegion);
     if (money.length === 0) return null;
 
-    const best = money.reduce((a, b) => (b.value > a.value ? b : a));
+    const best = pickByConsensus(
+      money.map((item) => ({ money: item, score: 10, position: item.index })),
+    );
+    if (!best) return null;
+
     return {
-      price: best.value,
-      currency: best.currency,
+      price: best.money.value,
+      currency: best.money.currency,
       available: availabilityFromText(text),
       title: null,
       strategy: 'heuristic',

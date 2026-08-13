@@ -6,6 +6,7 @@ import {
   extract,
   findMoney,
   normalizeNumber,
+  normalizeSpacing,
   parseMoney,
   readMetaTags,
   type PageSnapshot,
@@ -153,6 +154,61 @@ describe('extract — strategy order', () => {
   it('returns no price for a page that has none', () => {
     const result = extract(fixture('no-price.html'));
     expect(result?.price ?? null).toBeNull();
+  });
+});
+
+describe('normalizeSpacing', () => {
+  const NBSP = '\u00a0';
+
+  it('closes up a decimal separator split across elements', () => {
+    // What tag-stripping leaves behind when a retailer splits the price into
+    // <span>14,499</span><span>.</span><span>00</span>.
+    expect(normalizeSpacing('14,499 . 00')).toBe('14,499.00');
+    expect(normalizeSpacing('1 299 , 90')).toBe('1 299,90');
+  });
+
+  it('joins no-break-space thousands grouping', () => {
+    expect(normalizeSpacing(`1${NBSP}299,90`)).toBe('1299,90');
+    expect(normalizeSpacing(`10${NBSP}999`)).toBe('10999');
+  });
+
+  it('leaves plain-space-separated numbers apart', () => {
+    // Otherwise two adjacent prices, or prose like "Save 20 000", would fuse.
+    expect(normalizeSpacing('89.99 129.99')).toBe('89.99 129.99');
+    expect(normalizeSpacing('Save 20 000')).toBe('Save 20 000');
+  });
+});
+
+describe('findMoney — adjacent numbers', () => {
+  it('does not merge two prices separated by a plain space', () => {
+    const found = findMoney('$89.99 $129.99');
+    expect(found.map((m) => m.value)).toEqual([89.99, 129.99]);
+  });
+});
+
+describe('extract — picks the right price among decoys', () => {
+  it('ignores add-ons above the real price and financing totals below it', () => {
+    const result = extract(fixture('marketplace-addons.html'));
+    expect(result?.price).toBe(14499);
+    expect(result?.currency).toBe('INR');
+    expect(result?.available).toBe(true);
+  });
+
+  it('does not merge two prices separated only by whitespace', () => {
+    const result = extract(fixture('adjacent-prices.html'));
+    expect(result?.price).toBe(89.99);
+    // The failure this guards against produced a five-figure number.
+    expect(result?.price).toBeLessThan(1000);
+  });
+
+  it('reassembles a price split across spans with no-break grouping', () => {
+    const result = extract(fixture('split-price-spans.html'));
+    expect(result?.price).toBe(1299.9);
+    expect(result?.currency).toBe('EUR');
+  });
+
+  it('still prefers structured data when the page provides it', () => {
+    expect(extract(fixture('json-ld.html'))?.strategy).toBe('json-ld');
   });
 });
 

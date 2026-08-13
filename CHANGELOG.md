@@ -6,6 +6,40 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Fixed
+
+- **Price detection picked add-on prices instead of the product's own.** Selector
+  candidates were ranked partly by document position, on the assumption that the hero
+  price comes first. Marketplace pages inject warranty and accessory offers _above_ the
+  product price, so the cheapest upsell reliably won — an Amazon listing at ₹14,499 was
+  tracked as ₹649. Position ranking is gone, replaced by consensus: candidates are
+  grouped by value and the number the most independent elements agree on wins. Real
+  pages state their price several times (an off-screen accessibility span, a hidden
+  form input, the visible digits split across elements) while a decoy appears once or
+  twice, so this generalises across stores instead of encoding any one site's markup.
+- **Two adjacent prices could merge into one enormous number.** The number pattern
+  allowed whitespace inside a figure, so `"₹649.00 ₹1,349.00"` could parse as a single
+  value; one check recorded ₹2,198,900. The pattern is now strict, and spacing that
+  genuinely belongs inside a number — a decimal separator split across elements, or
+  no-break-space thousands grouping — is repaired beforehand.
+- **`&nbsp;` was decoded to a plain space**, erasing the distinction between a
+  thousands separator and a gap between two numbers, which broke prices like
+  `1&nbsp;299,90`.
+- **The last-resort heuristic took the largest number near the top of the page**,
+  which is typically a financing total or an unrelated item. It now uses the same
+  consensus rule.
+- Expanded the disqualifying-token list to cover add-ons, warranties, accessories,
+  EMI/instalment figures, trade-in and cashback amounts, and cart totals; hidden
+  `<input value>` and `<meta content>` prices are now read directly.
+
+### Added
+
+- A guard against implausible price jumps: a reading 20x away from the last good one
+  is recorded as a failed check rather than a price. Failed checks never alert, so a
+  single misread cannot send a phantom "price dropped" email or corrupt the history
+  chart. It self-heals — after two consecutive rejections the new value is accepted,
+  so a genuine repricing is never blocked permanently.
+
 ## [0.1.0] — 2026-08-13
 
 First release: the MVP is feature-complete.
