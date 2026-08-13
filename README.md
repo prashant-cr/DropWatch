@@ -5,6 +5,11 @@
 **Watch a price. Get an email when it drops.**
 Self-hosted, single file database, no account, no cloud.
 
+[![CI](https://github.com/prashant-cr/PriceWatch/actions/workflows/ci.yml/badge.svg)](https://github.com/prashant-cr/PriceWatch/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-10b981)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%E2%89%A5%2020-10b981)](https://nodejs.org)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-10b981)](CONTRIBUTING.md)
+
 [Quickstart](#30-second-quickstart) · [Features](#features) · [FAQ](#faq) · [Contributing](CONTRIBUTING.md)
 
 </div>
