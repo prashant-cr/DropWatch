@@ -1,0 +1,12 @@
+services:
+  pricewatch:
+    build: .
+    # Or, once published: image: ghcr.io/prashant-cr/pricewatch:latest
+    ports:
+      - '3070:3070'
+    volumes:
+      - pricewatch-data:/data
+    restart: unless-stopped
+
+volumes:
+  pricewatch-data:

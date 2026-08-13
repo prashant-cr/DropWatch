@@ -1,0 +1,70 @@
+name: Bug report
+description: Something is broken — including "the price it found is wrong"
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. For anything to do with checking a page, the URL and a
+        few rows of the check log are what make it fixable.
+
+  - type: input
+    id: url
+    attributes:
+      label: Product URL
+      description: The page being watched. Leave blank if this is not about a specific page.
+      placeholder: https://store.example.com/products/…
+    validations:
+      required: false
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: check-log
+    attributes:
+      label: Check log excerpt
+      description: >
+        From the watch's detail page or the History page — a few rows around the
+        problem, including the price found, the result and any error message.
+      render: text
+    validations:
+      required: false
+
+  - type: input
+    id: detected-vs-expected
+    attributes:
+      label: Detected price vs. correct price
+      description: Only if detection read the wrong number.
+      placeholder: 'Found £3.99 (shipping), should be £57.50'
+
+  - type: dropdown
+    id: install
+    attributes:
+      label: How are you running it?
+      options:
+        - npx pricewatch
+        - Docker / docker compose
+        - From source (npm run dev)
+        - From source (npm run build && npm start)
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: PriceWatch version
+      placeholder: '0.1.0'
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: OS and Node version
+      placeholder: macOS 14.5, Node 20.11

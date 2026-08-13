@@ -1,0 +1,9 @@
+# The project brief is authored by hand; leave its formatting alone.
+CLAUDE.md
+
+dist/
+data/
+node_modules/
+coverage/
+tests/fixtures/
+package-lock.json

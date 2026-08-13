@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest something PriceWatch should do
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        PriceWatch tries to stay small and easy to run. The strongest requests explain
+        the problem rather than the solution.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem are you running into?
+      description: What are you trying to do that PriceWatch makes hard or impossible today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What would you like it to do?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Anything you tried instead?
+      description: Workarounds, other tools, and why they did not fit.
+
+  - type: checkboxes
+    id: policy
+    attributes:
+      label: Scope check
+      options:
+        - label: >
+            This does not involve getting around a site's bot protection (CAPTCHA
+            solving, anti-bot bypass, fingerprint spoofing, proxy rotation) or
+            checking more often than every 15 minutes.
+          required: true

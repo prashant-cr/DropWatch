@@ -1,0 +1,44 @@
+name: New alert channel
+description: Request or claim a notification channel (Telegram, Discord, Slack, ntfy, …)
+labels: [enhancement, channel]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Channels are the easiest thing to contribute — one file implementing the
+        `AlertChannel` interface, plus a settings section. See the worked Telegram
+        example in [CONTRIBUTING.md](../../CONTRIBUTING.md#adding-an-alert-channel).
+
+  - type: input
+    id: service
+    attributes:
+      label: Which service?
+      placeholder: Telegram, Discord webhook, Slack webhook, ntfy, Pushover, …
+    validations:
+      required: true
+
+  - type: input
+    id: docs
+    attributes:
+      label: Link to its send-message API docs
+    validations:
+      required: true
+
+  - type: textarea
+    id: credentials
+    attributes:
+      label: What does a user need to configure?
+      description: The settings fields this channel needs — token, webhook URL, chat id, …
+      placeholder: |
+        - Bot token
+        - Chat ID
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: claim
+    attributes:
+      label: Are you planning to build it?
+      options:
+        - label: I would like to open a PR for this
+          required: false
