@@ -27,3 +27,25 @@ export const CHECK_TIMEOUT_MS = 5 * 60 * 1000;
  * created together do not all fire at the same second.
  */
 export const SCHEDULE_JITTER_MS = 45_000;
+
+/**
+ * Days of full-resolution check history kept by default. Comfortably covers the
+ * 90-day history chart, which is the longest range the UI offers.
+ */
+export const DEFAULT_RETENTION_DAYS = 90;
+
+/**
+ * Floor on a non-zero retention window. Below about a week the dashboard sparkline
+ * has nothing left to draw, so the setting would be quietly breaking the UI.
+ */
+export const MIN_RETENTION_DAYS = 7;
+
+/** Upper bound the settings API accepts for retention, ~5 years. */
+export const MAX_RETENTION_DAYS = 1825;
+
+/**
+ * When the nightly prune runs. An odd minute in the small hours: off the top of the
+ * hour, where every cron preset already fires, and away from the times users are
+ * likely to be watching the dashboard.
+ */
+export const MAINTENANCE_CRON = '17 3 * * *';

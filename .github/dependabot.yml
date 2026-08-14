@@ -1,0 +1,33 @@
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels: [dependencies]
+    commit-message:
+      prefix: chore
+      include: scope
+
+    groups:
+      # Patch and minor bumps land as one PR per week rather than a dozen. CI
+      # (including the packaged-CLI smoke test) is what decides whether they are safe.
+      minor-and-patch:
+        update-types: [minor, patch]
+
+    ignore:
+      # Playwright pins the Chromium build it downloads, so a major bump changes the
+      # browser under every user on their next install. Worth doing deliberately.
+      - dependency-name: playwright
+        update-types: [version-update:semver-major]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels: [dependencies]
+    commit-message:
+      prefix: chore

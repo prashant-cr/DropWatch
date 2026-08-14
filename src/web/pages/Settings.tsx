@@ -31,6 +31,15 @@ const SMTP_PRESETS = [
   },
 ] as const;
 
+/** Retention windows offered in the UI. `0` disables pruning entirely. */
+const RETENTION_PRESETS = [
+  { days: 30, label: '30 days' },
+  { days: 90, label: '90 days (recommended)' },
+  { days: 180, label: '6 months' },
+  { days: 365, label: '1 year' },
+  { days: 0, label: 'Forever — never thin history' },
+] as const;
+
 type FormState = Omit<AppSettings, 'onboarding_dismissed'>;
 
 export function Settings({ settings, onSaved }: SettingsPageProps) {
@@ -279,6 +288,26 @@ export function Settings({ settings, onSaved }: SettingsPageProps) {
               {timezones(form.timezone).map((zone) => (
                 <option key={zone} value={zone}>
                   {zone}
+                </option>
+              ))}
+            </select>
+          </Field>
+
+          <Field
+            label="Keep full history for"
+            id="retention"
+            className="sm:col-span-2"
+            hint="Older checks are thinned to a daily low, high and closing price, and failed checks are dropped. Charts keep their shape; the database stops growing forever."
+          >
+            <select
+              id="retention"
+              className="input"
+              value={String(form.retention_days)}
+              onChange={(event) => set('retention_days', Number(event.target.value))}
+            >
+              {RETENTION_PRESETS.map((preset) => (
+                <option key={preset.days} value={preset.days}>
+                  {preset.label}
                 </option>
               ))}
             </select>

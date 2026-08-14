@@ -1,14 +1,17 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { closeDb, initDb } from '../src/server/db/index.js';
+import { closeDb, getDb, initDb } from '../src/server/db/index.js';
 import { createWatch, deleteWatch, updateWatch, type NewWatch } from '../src/server/db/watches.js';
 import {
   nextRunFor,
+  runMaintenance,
   scheduledWatchIds,
   startScheduler,
   stopScheduler,
   syncWatch,
 } from '../src/core/scheduler.js';
 import { getWatch } from '../src/server/db/watches.js';
+import { countChecks, recordCheck } from '../src/server/db/checks.js';
+import { updateSettings } from '../src/server/db/settings.js';
 
 function newWatch(overrides: Partial<NewWatch> = {}) {
   return createWatch({
@@ -139,5 +142,55 @@ describe('nextRunFor', () => {
   it('is stable across calls, so the dashboard countdown does not jump', () => {
     const watch = newWatch({ interval_cron: '0 * * * *' });
     expect(nextRunFor(watch)).toBe(nextRunFor(watch));
+  });
+});
+
+describe('maintenance', () => {
+  const DAY_MS = 24 * 60 * 60 * 1000;
+
+  const oldCheck = (watchId: number, price: number, daysAgo: number, hour: number) => {
+    const at = new Date(Date.now() - daysAgo * DAY_MS);
+    at.setUTCHours(hour, 0, 0, 0);
+    return recordCheck({
+      watch_id: watchId,
+      price,
+      available: true,
+      status: 'ok',
+      duration_ms: 1,
+      checked_at: at.toISOString(),
+    });
+  };
+
+  it('prunes using the configured retention window', () => {
+    const watch = newWatch();
+    oldCheck(watch.id, 120, 200, 8);
+    oldCheck(watch.id, 90, 200, 9);
+    oldCheck(watch.id, 150, 200, 10);
+    oldCheck(watch.id, 130, 200, 11);
+
+    runMaintenance();
+
+    expect(countChecks(watch.id)).toBe(3);
+  });
+
+  it('leaves history alone when retention is turned off', () => {
+    updateSettings({ retention_days: 0 });
+    const watch = newWatch();
+    for (let hour = 8; hour < 14; hour++) oldCheck(watch.id, 100 + hour, 200, hour);
+
+    runMaintenance();
+
+    expect(countChecks(watch.id)).toBe(6);
+  });
+
+  it('survives a failure instead of taking the scheduler down with it', () => {
+    // Pull the table out from under the prune. Deliberately not closeDb(): a closed
+    // handle makes the next getDb() open the real on-disk database, which no test
+    // should ever touch.
+    getDb().exec('DROP TABLE checks');
+
+    expect(() => {
+      runMaintenance();
+    }).not.toThrow();
   });
 });

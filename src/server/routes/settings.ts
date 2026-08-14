@@ -1,5 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { AppSettings, SettingsResponse } from '../../shared/types.js';
+import { MAX_RETENTION_DAYS, MIN_RETENTION_DAYS } from '../../core/constants.js';
 import { validateSchedule } from '../../core/cron.js';
 import { sendTestEmail } from '../../core/channels/index.js';
 import { startScheduler } from '../../core/scheduler.js';
@@ -67,6 +68,21 @@ export async function settingsRoutes(app: FastifyInstance): Promise<void> {
       const result = validateSchedule(interval, timezone ?? getSettings().timezone);
       if (!result.ok) throw new ValidationError(result.message ?? 'Invalid schedule.');
       patch.default_interval_cron = interval;
+    }
+
+    const retention = optionalNumber(body, 'retention_days');
+    if (retention !== undefined && retention !== null) {
+      if (!Number.isInteger(retention) || retention < 0 || retention > MAX_RETENTION_DAYS) {
+        throw new ValidationError(
+          `History retention must be between 0 and ${MAX_RETENTION_DAYS} days.`,
+        );
+      }
+      if (retention > 0 && retention < MIN_RETENTION_DAYS) {
+        throw new ValidationError(
+          `Keep at least ${MIN_RETENTION_DAYS} days of history, or 0 to keep it forever.`,
+        );
+      }
+      patch.retention_days = retention;
     }
 
     const dismissed = optionalBoolean(body, 'onboarding_dismissed');

@@ -6,6 +6,43 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-08-14
+
+Published to npm as **`dropwatch`**. The registry rejected `price-watch` as too
+similar to an existing package, so the project was renamed rather than shipped under
+a scoped name.
+
+### Changed
+
+- **Renamed from PriceWatch to DropWatch.** The command is now `npx dropwatch`,
+  environment variables are `DROPWATCH_*`, and the database is `data/dropwatch.db`.
+  An existing `pricewatch.db` in the same directory is opened as-is, so upgrading in
+  place keeps your watches and history.
+- `GET /api/health` reports the real package version instead of a hardcoded string.
+
+### Added
+
+- **History retention.** Checks stay at full resolution for 90 days; older days are
+  thinned to their low, high and closing price and older failures are dropped, with a
+  nightly job doing the work. Previously every check was kept forever — a single
+  watch at the 15-minute minimum writes about 35,000 rows a year. Configurable under
+  **Settings → Keep full history for**, including "forever" for anyone who wants the
+  old behaviour.
+- **Idle browser shutdown.** The shared Chromium closes after ten minutes without a
+  check instead of staying resident for the life of the process, which is most of it.
+- Route-level tests covering the HTTP layer, and tests for the local-network guard.
+
+### Security
+
+- **The checker no longer visits the local network.** URLs resolving to loopback,
+  private, link-local or CGNAT addresses are rejected, including the cloud metadata
+  endpoint at `169.254.169.254`. Set `DROPWATCH_ALLOW_PRIVATE_HOSTS=1` to opt back in.
+  This validates the URL, not the DNS answer.
+- **The database file and its write-ahead log are created `0600`**, so other accounts
+  on the machine cannot read the SMTP password stored in it.
+- Added [SECURITY.md](SECURITY.md) documenting the threat model and how to report a
+  vulnerability.
+
 ### Fixed
 
 - **Price detection picked add-on prices instead of the product's own.** Selector
@@ -83,5 +120,6 @@ First release: the MVP is feature-complete.
 - The minimum check interval is 15 minutes, enforced for preset and custom schedules
   alike.
 
-[unreleased]: https://github.com/prashant-cr/DropWatch/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/prashant-cr/DropWatch/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/prashant-cr/DropWatch/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/prashant-cr/DropWatch/releases/tag/v0.1.0

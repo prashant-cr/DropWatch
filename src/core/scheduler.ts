@@ -12,9 +12,10 @@ import cron, { type ScheduledTask } from 'node-cron';
 import type { Watch } from '../shared/types.js';
 import { getWatch, listWatches } from '../server/db/watches.js';
 import { getSettings } from '../server/db/settings.js';
+import { pruneChecks } from '../server/db/retention.js';
 import { runCheck } from './checker.js';
 import { nextRun } from './cron.js';
-import { SCHEDULE_JITTER_MS } from './constants.js';
+import { MAINTENANCE_CRON, SCHEDULE_JITTER_MS } from './constants.js';
 
 interface Job {
   task: ScheduledTask;
@@ -23,6 +24,7 @@ interface Job {
 
 const jobs = new Map<number, Job>();
 const running = new Set<number>();
+let maintenance: ScheduledTask | null = null;
 
 /** Watch IDs with a check in flight — the UI shows these as "checking…". */
 export function runningWatchIds(): number[] {
@@ -119,15 +121,45 @@ export function syncWatch(watchId: number): void {
   scheduleWatch(watch);
 }
 
-/** Registers every watch. Called once at boot. */
+/**
+ * Trims aged-out check history. Exported so it can be driven directly from tests
+ * and, later, from a manual "clean up now" control.
+ *
+ * Like every scheduled job here it must never throw: a failed prune is a log line,
+ * not a dead scheduler.
+ */
+export function runMaintenance(): void {
+  try {
+    const { retention_days } = getSettings();
+    const result = pruneChecks(retention_days);
+    const removed = result.errorsDeleted + result.downsampled;
+    if (removed > 0) {
+      console.log(
+        `[dropwatch] pruned ${removed} check(s) older than ${retention_days} days` +
+          `${result.vacuumed ? ', compacted the database' : ''}`,
+      );
+    }
+  } catch (error) {
+    console.error('[dropwatch] maintenance failed:', error);
+  }
+}
+
+/** Registers every watch, plus the nightly maintenance job. Called once at boot. */
 export function startScheduler(): void {
   stopScheduler();
   for (const watch of listWatches()) scheduleWatch(watch);
+
+  maintenance = cron.schedule(MAINTENANCE_CRON, () => {
+    runMaintenance();
+  });
+
   console.log(`[dropwatch] scheduled ${jobs.size} watch(es)`);
 }
 
 export function stopScheduler(): void {
   for (const id of [...jobs.keys()]) unscheduleWatch(id);
+  maintenance?.stop();
+  maintenance = null;
 }
 
 export function scheduledWatchIds(): number[] {

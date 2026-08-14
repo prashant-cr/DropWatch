@@ -55,6 +55,41 @@ export interface FetchResult {
 
 let browserPromise: Promise<Browser> | null = null;
 
+/**
+ * How long the shared Chromium may sit unused before it is shut down.
+ *
+ * Checks are minutes apart at best and a day apart at worst, so for almost all of
+ * its life the browser is idle resident memory — a couple of hundred MB doing
+ * nothing on a machine that is probably also the user's laptop. Ten minutes is long
+ * enough that a burst of checks reuses one browser, and short enough that the idle
+ * case is genuinely idle. The cost is a cold start (~1s) on the next check, which is
+ * nothing next to the page load that follows it.
+ */
+export const BROWSER_IDLE_MS = 10 * 60 * 1000;
+
+let idleTimer: ReturnType<typeof setTimeout> | null = null;
+let inFlight = 0;
+
+function cancelIdleShutdown(): void {
+  if (idleTimer === null) return;
+  clearTimeout(idleTimer);
+  idleTimer = null;
+}
+
+function scheduleIdleShutdown(): void {
+  cancelIdleShutdown();
+  if (inFlight > 0 || !browserPromise) return;
+
+  idleTimer = setTimeout(() => {
+    idleTimer = null;
+    if (inFlight > 0) return;
+    void closeBrowser();
+  }, BROWSER_IDLE_MS);
+
+  // Never hold the process open just to close a browser later.
+  idleTimer.unref?.();
+}
+
 async function getBrowser(): Promise<Browser> {
   browserPromise ??= chromium.launch({ headless: true }).catch((error: unknown) => {
     browserPromise = null;
@@ -71,6 +106,7 @@ async function getBrowser(): Promise<Browser> {
 }
 
 export async function closeBrowser(): Promise<void> {
+  cancelIdleShutdown();
   const pending = browserPromise;
   browserPromise = null;
   if (!pending) return;
@@ -79,6 +115,11 @@ export async function closeBrowser(): Promise<void> {
   } catch {
     // Shutting down anyway.
   }
+}
+
+/** True while a Chromium instance is alive. Exposed for tests. */
+export function browserIsRunning(): boolean {
+  return browserPromise !== null;
 }
 
 // ---------------------------------------------------------------------------
@@ -186,6 +227,22 @@ export async function fetchPage(url: string, options: FetchOptions = {}): Promis
 
 async function fetchPageNow(url: string, options: FetchOptions): Promise<FetchResult> {
   const startedAt = Date.now();
+
+  inFlight++;
+  cancelIdleShutdown();
+  try {
+    return await withBrowser(url, options, startedAt);
+  } finally {
+    inFlight--;
+    scheduleIdleShutdown();
+  }
+}
+
+async function withBrowser(
+  url: string,
+  options: FetchOptions,
+  startedAt: number,
+): Promise<FetchResult> {
   const browser = await getBrowser();
   const context = await newContext(browser, options);
 

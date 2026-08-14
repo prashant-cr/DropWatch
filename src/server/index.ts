@@ -7,7 +7,7 @@
 
 import Fastify, { type FastifyInstance } from 'fastify';
 import fastifyStatic from '@fastify/static';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -22,6 +22,17 @@ import { watchRoutes } from './routes/watches.js';
 import { HttpError } from './validate.js';
 
 const DEFAULT_PORT = 3070;
+
+/**
+ * Read from package.json rather than written out here, so `/api/health` cannot drift
+ * away from the version that was actually published. Both `src/server/` and
+ * `dist/server/` sit two levels below it.
+ */
+const VERSION: string = (
+  JSON.parse(
+    readFileSync(fileURLToPath(new URL('../../package.json', import.meta.url)), 'utf8'),
+  ) as { version: string }
+).version;
 
 /** True when running from TypeScript sources under tsx rather than from dist/. */
 const isDev = import.meta.url.endsWith('.ts');
@@ -62,7 +73,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     });
   });
 
-  app.get('/api/health', async () => ({ ok: true, version: '0.1.0' }));
+  app.get('/api/health', async () => ({ ok: true, version: VERSION }));
 
   await app.register(watchRoutes);
   await app.register(checkRoutes);

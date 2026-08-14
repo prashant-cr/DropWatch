@@ -86,16 +86,24 @@ way:
 
 Nothing is required. These environment variables exist if you want them:
 
-| Variable             | Default     | Purpose                                         |
-| -------------------- | ----------- | ----------------------------------------------- |
-| `PORT`               | `3070`      | Port to listen on                               |
-| `HOST`               | `127.0.0.1` | Bind address. Docker sets `0.0.0.0`             |
-| `DROPWATCH_DATA_DIR` | `./data`    | Where `dropwatch.db` lives                      |
-| `DROPWATCH_DB`       | —           | Full path to the database file, overrides above |
-| `LOG_LEVEL`          | `warn`      | Fastify log level                               |
+| Variable                        | Default     | Purpose                                              |
+| ------------------------------- | ----------- | ---------------------------------------------------- |
+| `PORT`                          | `3070`      | Port to listen on                                    |
+| `HOST`                          | `127.0.0.1` | Bind address. Docker sets `0.0.0.0`                  |
+| `DROPWATCH_DATA_DIR`            | `./data`    | Where `dropwatch.db` lives                           |
+| `DROPWATCH_DB`                  | —           | Full path to the database file, overrides above      |
+| `DROPWATCH_ALLOW_PRIVATE_HOSTS` | unset       | Permit watching loopback / LAN addresses (see below) |
+| `LOG_LEVEL`                     | `warn`      | Fastify log level                                    |
 
 > DropWatch binds to loopback by default because it has **no authentication**. If you
 > expose it on a network, put it behind a reverse proxy that does.
+> [SECURITY.md](SECURITY.md) has the full threat model.
+
+By default DropWatch will not check URLs that point at your own machine or local
+network — loopback, `10.x`, `192.168.x`, `169.254.x` and the rest. It drives a real
+browser and has no authentication, so this keeps it from being aimed at a router
+admin page or a cloud metadata endpoint. Set `DROPWATCH_ALLOW_PRIVATE_HOSTS=1` if you
+really are watching a store on your own network.
 
 ## FAQ
 
@@ -129,6 +137,17 @@ tail of ordinary stores.
 
 `./data/dropwatch.db`, a single SQLite file. Back it up by copying it. Nothing is
 sent anywhere except the page requests themselves and the alert emails you configure.
+
+The file is created readable only by your user, because your SMTP password is stored
+in it in plain text — it has to be, to authenticate to your mail server. Use a Gmail
+App Password or a Resend API key rather than a real account password.
+
+### Will the database grow forever?
+
+No. Checks stay at full resolution for 90 days by default; after that each day is
+thinned to its low, high and closing price, and failed checks are dropped. History
+charts keep their shape while the file stops growing without bound. Change the window
+— or turn thinning off entirely — under **Settings → Keep full history for**.
 
 ### Does it need to keep running?
 

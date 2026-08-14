@@ -113,6 +113,12 @@ export interface AppSettings extends SmtpSettings {
   default_interval_cron: string;
   timezone: string;
   currency: string;
+  /**
+   * Days of full-resolution check history to keep. Older successful checks are
+   * downsampled to a daily low/high/close and older failures are dropped. `0` keeps
+   * everything forever.
+   */
+  retention_days: number;
   /** Dismissed by the user once email is configured or explicitly skipped. */
   onboarding_dismissed: boolean;
 }

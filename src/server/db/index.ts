@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { existsSync, mkdirSync, readFileSync } from 'node:fs';
+import { chmodSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -41,8 +41,34 @@ export function initDb(file?: string): Db {
   db.pragma('foreign_keys = ON');
   db.exec(readFileSync(SCHEMA_PATH, 'utf8'));
 
+  if (target !== ':memory:') restrictPermissions(target);
+
   instance = db;
   return db;
+}
+
+/**
+ * Locks the database down to the owner.
+ *
+ * The SMTP password is stored in this file in plain text — it has to be, since
+ * DropWatch needs the original to authenticate to the mail server, and there is no
+ * second secret to encrypt it with on a zero-config local tool. What we can do is
+ * make sure other accounts on the machine cannot read it, which the default 0644
+ * would happily allow.
+ *
+ * Best-effort: chmod is meaningless on Windows and may fail on exotic filesystems,
+ * and neither case is worth refusing to start over.
+ */
+function restrictPermissions(target: string): void {
+  // WAL mode keeps two sidecar files next to the database; they hold recently
+  // written pages, so leaving them world-readable would defeat the exercise.
+  for (const file of [target, `${target}-wal`, `${target}-shm`]) {
+    try {
+      if (existsSync(file)) chmodSync(file, 0o600);
+    } catch {
+      // Non-POSIX filesystem or no permission to change it — carry on.
+    }
+  }
 }
 
 export function getDb(): Db {

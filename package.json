@@ -1,6 +1,6 @@
 {
   "name": "dropwatch",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Self-hosted price & availability watcher. Add a product URL, set a target price, get an email when it drops.",
   "keywords": [
     "price-tracker",

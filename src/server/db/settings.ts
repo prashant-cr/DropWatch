@@ -1,5 +1,6 @@
 import type { AppSettings } from '../../shared/types.js';
 import { DEFAULT_INTERVAL_CRON } from '../../shared/intervals.js';
+import { DEFAULT_RETENTION_DAYS } from '../../core/constants.js';
 import { getDb } from './index.js';
 
 function systemTimezone(): string {
@@ -22,6 +23,7 @@ export function defaultSettings(): AppSettings {
     default_interval_cron: DEFAULT_INTERVAL_CRON,
     timezone: systemTimezone(),
     currency: 'USD',
+    retention_days: DEFAULT_RETENTION_DAYS,
     onboarding_dismissed: false,
   };
 }
