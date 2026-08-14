@@ -31,7 +31,7 @@ copying it.
 ## 30-second quickstart
 
 ```bash
-npx pricewatch
+npx price-watch
 ```
 
 That is the whole setup. It downloads Chromium on first run, creates `./data/`, and

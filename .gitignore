@@ -7,3 +7,6 @@ coverage/
 .env
 .env.local
 .vite/
+
+# npm pack output
+*.tgz

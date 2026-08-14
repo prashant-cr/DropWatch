@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * `npx pricewatch` entry point.
+ * `npx price-watch` entry point.
  *
  * Its whole job is to make the first run work with no setup: check the Node
  * version, make sure Chromium is present (downloading it once, with a visible
@@ -18,10 +18,10 @@ const args = new Set(process.argv.slice(2));
 
 if (args.has('--help') || args.has('-h')) {
   console.log(`
-  pricewatch — self-hosted price & availability watcher
+  price-watch — self-hosted price & availability watcher
 
   Usage
-    npx pricewatch [options]
+    npx price-watch [options]
 
   Options
     -h, --help          Show this message

@@ -1,5 +1,5 @@
 {
-  "name": "pricewatch",
+  "name": "price-watch",
   "version": "0.1.0",
   "description": "Self-hosted price & availability watcher. Add a product URL, set a target price, get an email when it drops.",
   "keywords": [
@@ -15,11 +15,13 @@
     "node": ">=20"
   },
   "bin": {
+    "price-watch": "bin/pricewatch.js",
     "pricewatch": "bin/pricewatch.js"
   },
   "files": [
     "bin",
     "dist",
+    "!dist/**/*.map",
     "README.md",
     "LICENSE"
   ],
@@ -35,7 +37,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . && prettier --check .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "prepublishOnly": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "@fastify/static": "^8.0.4",
@@ -69,5 +72,14 @@
     "typescript-eslint": "^8.18.1",
     "vite": "^6.0.5",
     "vitest": "^2.1.8"
-  }
+  },
+  "author": "Prashant Suthar <sutharprashant199722@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prashant-cr/PriceWatch.git"
+  },
+  "bugs": {
+    "url": "https://github.com/prashant-cr/PriceWatch/issues"
+  },
+  "homepage": "https://github.com/prashant-cr/PriceWatch#readme"
 }

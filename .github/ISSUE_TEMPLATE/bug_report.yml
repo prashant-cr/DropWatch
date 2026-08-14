@@ -48,7 +48,7 @@ body:
     attributes:
       label: How are you running it?
       options:
-        - npx pricewatch
+        - npx price-watch
         - Docker / docker compose
         - From source (npm run dev)
         - From source (npm run build && npm start)

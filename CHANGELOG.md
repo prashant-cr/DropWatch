@@ -67,7 +67,7 @@ First release: the MVP is feature-complete.
 - **Web UI** — card-grid dashboard, single-modal add-watch flow with live detection,
   watch detail page, light/dark mode, empty/loading/error states, toasts, and a mobile
   layout.
-- **Setup** — `npx pricewatch` with automatic Chromium install, and a Docker image with
+- **Setup** — `npx price-watch` with automatic Chromium install, and a Docker image with
   Chromium bundled.
 
 ### Security
