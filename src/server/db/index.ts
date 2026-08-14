@@ -1,5 +1,5 @@
 import Database from 'better-sqlite3';
-import { mkdirSync, readFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -9,11 +9,19 @@ const SCHEMA_PATH = fileURLToPath(new URL('./schema.sql', import.meta.url));
 
 let instance: Db | null = null;
 
-/** Absolute path of the SQLite file, honouring `PRICEWATCH_DATA_DIR`. */
+/** Absolute path of the SQLite file, honouring `DROPWATCH_DATA_DIR`. */
 export function databasePath(): string {
-  if (process.env.PRICEWATCH_DB) return resolve(process.env.PRICEWATCH_DB);
-  const dir = resolve(process.env.PRICEWATCH_DATA_DIR ?? 'data');
-  return resolve(dir, 'pricewatch.db');
+  if (process.env.DROPWATCH_DB) return resolve(process.env.DROPWATCH_DB);
+  const dir = resolve(process.env.DROPWATCH_DATA_DIR ?? 'data');
+  const target = resolve(dir, 'dropwatch.db');
+
+  // The project was renamed from PriceWatch; keep using an existing pricewatch.db
+  // rather than silently starting over with an empty database.
+  if (!existsSync(target)) {
+    const legacy = resolve(dir, 'pricewatch.db');
+    if (existsSync(legacy)) return legacy;
+  }
+  return target;
 }
 
 /**

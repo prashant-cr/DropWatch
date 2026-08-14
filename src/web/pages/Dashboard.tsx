@@ -89,7 +89,7 @@ export function Dashboard({ settings, onDismissOnboarding }: DashboardProps) {
               Set up email alerts
             </p>
             <p className="mt-0.5 text-sm text-slate-600 dark:text-slate-300">
-              PriceWatch is checking prices already. Add your SMTP details and it can tell you when
+              DropWatch is checking prices already. Add your SMTP details and it can tell you when
               one drops.{' '}
               <Link
                 to="/settings"
@@ -176,7 +176,7 @@ export function Dashboard({ settings, onDismissOnboarding }: DashboardProps) {
         <EmptyState
           icon={<PackageIcon className="h-6 w-6" />}
           title="Watch your first product"
-          description="Paste a product URL and PriceWatch will detect the name and price, then check it on a schedule and email you when it drops."
+          description="Paste a product URL and DropWatch will detect the name and price, then check it on a schedule and email you when it drops."
           action={
             <button type="button" className="btn-primary" onClick={() => setAddOpen(true)}>
               <PlusIcon />

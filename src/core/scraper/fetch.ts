@@ -3,7 +3,7 @@
  *
  * Deliberately boring: a realistic desktop browser, one request at a time per
  * domain, a minimum gap between requests, and images/fonts/media dropped so checks
- * stay cheap. When a site turns us away we say so and stop — PriceWatch does not
+ * stay cheap. When a site turns us away we say so and stop — DropWatch does not
  * implement CAPTCHA solving, anti-bot bypass, fingerprint spoofing or proxy
  * rotation, and contributions adding them are declined. See the README FAQ.
  */
@@ -224,7 +224,7 @@ async function fetchPageNow(url: string, options: FetchOptions): Promise<FetchRe
     if (detectsBlock(status, html)) {
       throw new ScrapeError(
         'blocked',
-        'This site blocks automated checking. PriceWatch will not try to get around it — ' +
+        'This site blocks automated checking. DropWatch will not try to get around it — ' +
           'check the page manually, or use the store’s own price-alert feature.',
       );
     }

@@ -42,7 +42,7 @@ export function App() {
           <Link to="/" className="flex shrink-0 items-center gap-2">
             <LogoIcon className="h-7 w-7" />
             <span className="text-[15px] font-semibold tracking-tight text-slate-900 dark:text-white">
-              PriceWatch
+              DropWatch
             </span>
           </Link>
 
@@ -98,8 +98,8 @@ export function App() {
 
       <footer className="border-t border-slate-200/70 py-5 dark:border-white/10">
         <div className="mx-auto max-w-6xl px-4 text-xs text-slate-400 sm:px-6 dark:text-slate-500">
-          PriceWatch · self-hosted, MIT licensed. Checks are rate-limited and never attempt to
-          bypass a site’s access controls.
+          DropWatch · self-hosted, MIT licensed. Checks are rate-limited and never attempt to bypass
+          a site’s access controls.
         </div>
       </footer>
     </div>
@@ -137,7 +137,7 @@ function NotFound() {
     <div className="card p-12 text-center">
       <h1 className="text-base font-semibold text-slate-900 dark:text-white">Page not found</h1>
       <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-        That address does not match anything in PriceWatch.
+        That address does not match anything in DropWatch.
       </p>
       <Link to="/" className="btn-secondary mt-5 inline-flex">
         Back to dashboard

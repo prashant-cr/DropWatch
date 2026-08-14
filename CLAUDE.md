@@ -1,6 +1,6 @@
-# CLAUDE.md — PriceWatch
+# CLAUDE.md — DropWatch
 
-Open-source, self-hosted price & availability watcher. Users add product URLs in a web UI, set a target price (or "notify when back in stock"), and PriceWatch checks on a schedule and sends alerts — email by default, other channels pluggable.
+Open-source, self-hosted price & availability watcher. Users add product URLs in a web UI, set a target price (or "notify when back in stock"), and DropWatch checks on a schedule and sends alerts — email by default, other channels pluggable.
 
 **Design goals, in priority order: dead-simple setup → reliable checking → beautiful UI → extensibility.**
 
@@ -10,9 +10,9 @@ Open-source, self-hosted price & availability watcher. Users add product URLs in
 
 ### What the user experiences
 
-1. Run one command (`npx pricewatch` or `docker compose up`).
+1. Run one command (`npx dropwatch` or `docker compose up`).
 2. Open `http://localhost:3070`. No signup, no cloud account.
-3. Paste a product URL → PriceWatch auto-detects the price and product name → user sets a target price or picks "alert when in stock" → picks a check frequency.
+3. Paste a product URL → DropWatch auto-detects the price and product name → user sets a target price or picks "alert when in stock" → picks a check frequency.
 4. A dashboard shows every watched item: current price, price history sparkline, last checked, next check, status (OK / below target / out of stock / check failed).
 5. When a condition triggers (price ≤ target, or item back in stock), an email is sent. Each trigger fires once until the condition resets (no alert spam).
 
@@ -42,7 +42,7 @@ Open-source, self-hosted price & availability watcher. Users add product URLs in
 | Server    | Fastify                         | small, fast                                  |
 | Frontend  | React + Vite + Tailwind CSS     | fast dev, easy for contributors              |
 | Charts    | Recharts                        | sparklines + history charts                  |
-| DB        | SQLite via `better-sqlite3`     | zero-setup, single file `data/pricewatch.db` |
+| DB        | SQLite via `better-sqlite3`     | zero-setup, single file `data/dropwatch.db` |
 | Scraping  | Playwright (Chromium, headless) | handles JS-rendered pages                    |
 | Scheduler | `node-cron` in-process          | no Redis/queue needed at this scale          |
 | Email     | `nodemailer`                    | SMTP-agnostic                                |
@@ -126,7 +126,7 @@ The UI is a headline feature — it should look like a polished product, not an 
 
 ## Setup Experience (non-negotiable)
 
-- `npx pricewatch` must work: downloads Chromium on first run (with a progress message), creates `./data/`, starts server, prints the URL.
+- `npx dropwatch` must work: downloads Chromium on first run (with a progress message), creates `./data/`, starts server, prints the URL.
 - `docker compose up` alternative with a 10-line compose file; image bundles Chromium.
 - First-run onboarding banner in UI: "Set up email alerts →" linking to Settings.
 - Zero required config to start; email is the only thing users must configure, and only when they want alerts.

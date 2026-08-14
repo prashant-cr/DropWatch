@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * `npx price-watch` entry point.
+ * `npx dropwatch` entry point.
  *
  * Its whole job is to make the first run work with no setup: check the Node
  * version, make sure Chromium is present (downloading it once, with a visible
@@ -18,10 +18,10 @@ const args = new Set(process.argv.slice(2));
 
 if (args.has('--help') || args.has('-h')) {
   console.log(`
-  price-watch — self-hosted price & availability watcher
+  dropwatch — self-hosted price & availability watcher
 
   Usage
-    npx price-watch [options]
+    npx dropwatch [options]
 
   Options
     -h, --help          Show this message
@@ -33,7 +33,7 @@ if (args.has('--help') || args.has('-h')) {
                         Do not verify that Chromium is installed
 
   Environment
-    PORT, HOST, PRICEWATCH_DATA_DIR, LOG_LEVEL
+    PORT, HOST, DROPWATCH_DATA_DIR, LOG_LEVEL
 
   Once running, open the printed URL. Nothing else needs configuring; add your
   SMTP details in Settings when you want email alerts.
@@ -50,7 +50,7 @@ if (args.has('--version') || args.has('-v')) {
 
 const major = Number(process.versions.node.split('.')[0]);
 if (major < 20) {
-  console.error(`PriceWatch needs Node 20 or newer; this is Node ${process.versions.node}.`);
+  console.error(`DropWatch needs Node 20 or newer; this is Node ${process.versions.node}.`);
   process.exit(1);
 }
 
@@ -60,11 +60,11 @@ if (!args.has('--skip-browser-check')) ensureChromium();
 
 const serverEntry = fileURLToPath(new URL('../dist/server/index.js', import.meta.url));
 if (!existsSync(serverEntry)) {
-  console.error('PriceWatch is not built. Run `npm run build` in the project directory first.');
+  console.error('DropWatch is not built. Run `npm run build` in the project directory first.');
   process.exit(1);
 }
 
-process.env.PRICEWATCH_AUTOSTART = '1';
+process.env.DROPWATCH_AUTOSTART = '1';
 await import(serverEntry);
 
 // ---------------------------------------------------------------------------
@@ -90,7 +90,7 @@ function applyFlagsToEnv() {
   if (host) process.env.HOST = host;
 
   const data = valueOf('--data');
-  if (data) process.env.PRICEWATCH_DATA_DIR = data;
+  if (data) process.env.DROPWATCH_DATA_DIR = data;
 }
 
 /**
@@ -114,7 +114,7 @@ function ensureChromium() {
   if (result.status !== 0) {
     console.error(
       '\nCould not install Chromium automatically.\n' +
-        'Run `npx playwright install chromium` and start PriceWatch again.',
+        'Run `npx playwright install chromium` and start DropWatch again.',
     );
     process.exit(1);
   }

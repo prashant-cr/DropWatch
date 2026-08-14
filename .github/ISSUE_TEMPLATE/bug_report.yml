@@ -48,7 +48,7 @@ body:
     attributes:
       label: How are you running it?
       options:
-        - npx price-watch
+        - npx dropwatch
         - Docker / docker compose
         - From source (npm run dev)
         - From source (npm run build && npm start)
@@ -58,7 +58,7 @@ body:
   - type: input
     id: version
     attributes:
-      label: PriceWatch version
+      label: DropWatch version
       placeholder: '0.1.0'
     validations:
       required: true

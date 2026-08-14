@@ -118,7 +118,7 @@ export function Settings({ settings, onSaved }: SettingsPageProps) {
           <h2 className="text-base font-semibold text-slate-900 dark:text-white">Email alerts</h2>
         </div>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          PriceWatch sends through your own SMTP server. Pick a preset to fill in the host.
+          DropWatch sends through your own SMTP server. Pick a preset to fill in the host.
         </p>
 
         <div className="mt-4 flex flex-wrap gap-2">
@@ -291,7 +291,7 @@ export function Settings({ settings, onSaved }: SettingsPageProps) {
           Why do some sites fail?
         </h2>
         <p className="mt-1.5 text-sm leading-relaxed text-slate-600 dark:text-slate-300">
-          Some stores actively block automated visitors. PriceWatch detects that and reports it
+          Some stores actively block automated visitors. DropWatch detects that and reports it
           rather than trying to get around it — no CAPTCHA solving, no anti-bot bypass, no proxy
           rotation. For those sites, use the store’s own price-alert feature or check manually.
         </p>

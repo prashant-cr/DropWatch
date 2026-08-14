@@ -1,4 +1,4 @@
--- PriceWatch schema. Applied on every boot; every statement is idempotent so this
+-- DropWatch schema. Applied on every boot; every statement is idempotent so this
 -- doubles as the migration for a fresh database.
 
 CREATE TABLE IF NOT EXISTS watches (

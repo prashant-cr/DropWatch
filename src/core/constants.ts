@@ -1,6 +1,6 @@
 /** Tunables shared across the core. */
 
-/** Failed checks in a row before PriceWatch emails the user about it (once). */
+/** Failed checks in a row before DropWatch emails the user about it (once). */
 export const CONSECUTIVE_FAILURES_BEFORE_ALERT = 3;
 
 /** Days of history shown on a dashboard sparkline. */

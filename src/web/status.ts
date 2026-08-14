@@ -23,7 +23,7 @@ export function watchStatus(watch: WatchWithState, isChecking = false): WatchSta
       tone: 'bad',
       label: 'Blocked by site',
       detail:
-        'This site blocks automated checking. PriceWatch will not try to get around that — ' +
+        'This site blocks automated checking. DropWatch will not try to get around that — ' +
         'check the page manually, or use the store’s own price-alert feature.',
       short: 'This site blocks automated checking. Check it manually instead.',
     };

@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 export type Theme = 'light' | 'dark' | 'system';
 
-const STORAGE_KEY = 'pricewatch-theme';
+const STORAGE_KEY = 'dropwatch-theme';
 
 function readStored(): Theme {
   try {

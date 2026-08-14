@@ -1,13 +1,13 @@
-# Contributing to PriceWatch
+# Contributing to DropWatch
 
-Thanks for taking a look. PriceWatch aims to stay small and easy to run — the bar for
+Thanks for taking a look. DropWatch aims to stay small and easy to run — the bar for
 a new dependency is high, and the bar for a new concept is higher.
 
 ## Dev setup
 
 ```bash
-git clone https://github.com/prashant-cr/PriceWatch.git
-cd PriceWatch
+git clone https://github.com/prashant-cr/DropWatch.git
+cd DropWatch
 npm install          # also downloads Chromium
 npm run dev
 ```
@@ -134,7 +134,7 @@ be paranoid.
 
 ## What will not be merged
 
-PriceWatch does not try to defeat sites that block it. Pull requests adding CAPTCHA
+DropWatch does not try to defeat sites that block it. Pull requests adding CAPTCHA
 solving, Cloudflare or anti-bot bypass, browser-fingerprint spoofing, proxy rotation
 for ban evasion, or anything else whose purpose is getting around a site's access
 controls will be declined. This is not negotiable, and it is not a comment on your

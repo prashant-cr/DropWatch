@@ -1,5 +1,5 @@
 /**
- * PriceWatch server: REST API + the built web UI, on one port.
+ * DropWatch server: REST API + the built web UI, on one port.
  *
  * Boot order matters — the database must exist before any route or the scheduler
  * touches it, and channels must be registered before the first check can alert.
@@ -53,7 +53,7 @@ export async function buildServer(): Promise<FastifyInstance> {
     const status = statusCodeOf(error);
     if (status >= 500) {
       request.log.error({ err: error }, 'request failed');
-      console.error('[pricewatch]', error);
+      console.error('[dropwatch]', error);
     }
     void reply.code(status).send({
       error: status >= 500 ? 'internal_error' : 'request_error',
@@ -100,7 +100,7 @@ export async function start(): Promise<FastifyInstance> {
 
   const app = await buildServer();
   const port = Number(process.env.PORT ?? DEFAULT_PORT);
-  // Loopback by default: PriceWatch has no auth, so it should not appear on the LAN
+  // Loopback by default: DropWatch has no auth, so it should not appear on the LAN
   // unless the operator asks for it (the Docker image sets HOST=0.0.0.0).
   const host = process.env.HOST ?? '127.0.0.1';
 
@@ -109,7 +109,7 @@ export async function start(): Promise<FastifyInstance> {
 
   const shown = host === '0.0.0.0' ? 'localhost' : host;
   console.log('');
-  console.log(`  PriceWatch is running → http://${shown}:${port}`);
+  console.log(`  DropWatch is running → http://${shown}:${port}`);
   console.log(`  Database: ${databasePath()}`);
   if (!getSettings().smtp_host) {
     console.log('  Email is not configured yet — open Settings to enable alerts.');
@@ -126,7 +126,7 @@ function installShutdownHandlers(app: FastifyInstance): void {
   const shutdown = (signal: string): void => {
     if (shuttingDown) return;
     shuttingDown = true;
-    console.log(`\n[pricewatch] ${signal} received, shutting down…`);
+    console.log(`\n[dropwatch] ${signal} received, shutting down…`);
 
     void (async () => {
       stopScheduler();
@@ -142,7 +142,7 @@ function installShutdownHandlers(app: FastifyInstance): void {
 
   // A rejected promise somewhere in a check must never kill the server.
   process.on('unhandledRejection', (reason) => {
-    console.error('[pricewatch] unhandled rejection:', reason);
+    console.error('[dropwatch] unhandled rejection:', reason);
   });
 }
 
@@ -150,9 +150,9 @@ function installShutdownHandlers(app: FastifyInstance): void {
 const invokedDirectly =
   process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href;
 
-if (invokedDirectly || process.env.PRICEWATCH_AUTOSTART === '1') {
+if (invokedDirectly || process.env.DROPWATCH_AUTOSTART === '1') {
   start().catch((error: unknown) => {
-    console.error('[pricewatch] failed to start:', error);
+    console.error('[dropwatch] failed to start:', error);
     process.exit(1);
   });
 }

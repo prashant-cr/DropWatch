@@ -293,7 +293,7 @@ export function validateSchedule(expression: string, timeZone?: string): CronVal
       ok: false,
       message:
         `That schedule would check every ${Math.round(gap)} minutes. ` +
-        `PriceWatch enforces a minimum of ${MIN_INTERVAL_MINUTES} minutes to stay polite to stores.`,
+        `DropWatch enforces a minimum of ${MIN_INTERVAL_MINUTES} minutes to stay polite to stores.`,
     };
   }
   return { ok: true };

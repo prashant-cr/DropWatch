@@ -29,7 +29,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
         : init?.headers,
     });
   } catch {
-    throw new ApiError(0, 'Cannot reach the PriceWatch server. Is it still running?');
+    throw new ApiError(0, 'Cannot reach the DropWatch server. Is it still running?');
   }
 
   if (response.status === 204) return undefined as T;

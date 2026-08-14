@@ -18,7 +18,7 @@ function buildTransport(settings: SmtpSettings): Transporter {
 
 function fromAddress(settings: SmtpSettings): string {
   const address = settings.smtp_from.trim() || settings.smtp_user.trim();
-  return address.includes('<') ? address : `PriceWatch <${address}>`;
+  return address.includes('<') ? address : `DropWatch <${address}>`;
 }
 
 export function createEmailChannel(deps: EmailChannelDeps): AlertChannel {
@@ -74,7 +74,7 @@ function defaultHtml(alert: Alert): string {
         View product
       </a>
       <p style="margin:24px 0 0;font-size:12px;color:#94a3b8;">
-        Sent by PriceWatch · ${escapeHtml(alert.watch.label || alert.watch.url)}
+        Sent by DropWatch · ${escapeHtml(alert.watch.label || alert.watch.url)}
       </p>
     </div>
   </div>
@@ -100,8 +100,8 @@ export async function sendTestEmail(settings: SmtpSettings): Promise<void> {
     kind: 'price',
     watch: {
       id: 0,
-      url: 'https://github.com/prashant-cr/PriceWatch',
-      label: 'PriceWatch test',
+      url: 'https://github.com/prashant-cr/DropWatch',
+      label: 'DropWatch test',
       selector_override: null,
       target_price: null,
       mode: 'price',
@@ -112,8 +112,8 @@ export async function sendTestEmail(settings: SmtpSettings): Promise<void> {
       created_at: new Date().toISOString(),
     },
     check: null,
-    subject: 'PriceWatch test email',
+    subject: 'DropWatch test email',
     body: 'Your SMTP settings work. Price and stock alerts will arrive at this address.',
-    url: 'https://github.com/prashant-cr/PriceWatch',
+    url: 'https://github.com/prashant-cr/DropWatch',
   });
 }

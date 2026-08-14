@@ -1,11 +1,11 @@
 <div align="center">
 
-# PriceWatch
+# DropWatch
 
 **Watch a price. Get an email when it drops.**
 Self-hosted, single file database, no account, no cloud.
 
-[![CI](https://github.com/prashant-cr/PriceWatch/actions/workflows/ci.yml/badge.svg)](https://github.com/prashant-cr/PriceWatch/actions/workflows/ci.yml)
+[![CI](https://github.com/prashant-cr/DropWatch/actions/workflows/ci.yml/badge.svg)](https://github.com/prashant-cr/DropWatch/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-10b981)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%E2%89%A5%2020-10b981)](https://nodejs.org)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-10b981)](CONTRIBUTING.md)
@@ -16,7 +16,7 @@ Self-hosted, single file database, no account, no cloud.
 
 ---
 
-Paste a product URL. PriceWatch figures out the name and the price by itself, checks
+Paste a product URL. DropWatch figures out the name and the price by itself, checks
 the page on a schedule you choose, and emails you the moment it drops below your
 target — or the moment a sold-out item comes back.
 
@@ -25,13 +25,13 @@ copying it.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/screenshot-dashboard-dark.png">
-  <img src="docs/screenshot-dashboard.png" alt="The PriceWatch dashboard: a grid of watched products, each with its current price, target, status and 30-day price sparkline.">
+  <img src="docs/screenshot-dashboard.png" alt="The DropWatch dashboard: a grid of watched products, each with its current price, target, status and 30-day price sparkline.">
 </picture>
 
 ## 30-second quickstart
 
 ```bash
-npx price-watch
+npx dropwatch
 ```
 
 That is the whole setup. It downloads Chromium on first run, creates `./data/`, and
@@ -71,7 +71,7 @@ open **Settings**, pick the Gmail or Resend preset, fill in your credentials, an
 ## How checking works
 
 A check runs headless Chromium, waits for the page to settle, reads the DOM, and
-records what it found. PriceWatch is a **polite scraper** and is built to stay that
+records what it found. DropWatch is a **polite scraper** and is built to stay that
 way:
 
 - At most one request at a time per domain, with a minimum 10-second gap between them.
@@ -86,15 +86,15 @@ way:
 
 Nothing is required. These environment variables exist if you want them:
 
-| Variable              | Default     | Purpose                                         |
-| --------------------- | ----------- | ----------------------------------------------- |
-| `PORT`                | `3070`      | Port to listen on                               |
-| `HOST`                | `127.0.0.1` | Bind address. Docker sets `0.0.0.0`             |
-| `PRICEWATCH_DATA_DIR` | `./data`    | Where `pricewatch.db` lives                     |
-| `PRICEWATCH_DB`       | —           | Full path to the database file, overrides above |
-| `LOG_LEVEL`           | `warn`      | Fastify log level                               |
+| Variable             | Default     | Purpose                                         |
+| -------------------- | ----------- | ----------------------------------------------- |
+| `PORT`               | `3070`      | Port to listen on                               |
+| `HOST`               | `127.0.0.1` | Bind address. Docker sets `0.0.0.0`             |
+| `DROPWATCH_DATA_DIR` | `./data`    | Where `dropwatch.db` lives                      |
+| `DROPWATCH_DB`       | —           | Full path to the database file, overrides above |
+| `LOG_LEVEL`          | `warn`      | Fastify log level                               |
 
-> PriceWatch binds to loopback by default because it has **no authentication**. If you
+> DropWatch binds to loopback by default because it has **no authentication**. If you
 > expose it on a network, put it behind a reverse proxy that does.
 
 ## FAQ
@@ -102,7 +102,7 @@ Nothing is required. These environment variables exist if you want them:
 ### Why did my check get blocked?
 
 Some stores actively detect and refuse automated visitors. When that happens
-PriceWatch marks the watch **"Blocked by site"** and stops retrying.
+DropWatch marks the watch **"Blocked by site"** and stops retrying.
 
 It will not work around the block. No CAPTCHA solving, no anti-bot bypass, no
 browser-fingerprint spoofing, no proxy rotation. **This is a deliberate, permanent
@@ -121,13 +121,13 @@ check will use it.
 
 ### Can I track Amazon?
 
-Often not — Amazon blocks automated checking, and PriceWatch will tell you so rather
-than fight it. Amazon has its own price-watch features. The tool is aimed at the long
+Often not — Amazon blocks automated checking, and DropWatch will tell you so rather
+than fight it. Amazon has its own price-alert features. The tool is aimed at the long
 tail of ordinary stores.
 
 ### Where is my data?
 
-`./data/pricewatch.db`, a single SQLite file. Back it up by copying it. Nothing is
+`./data/dropwatch.db`, a single SQLite file. Back it up by copying it. Nothing is
 sent anywhere except the page requests themselves and the alert emails you configure.
 
 ### Does it need to keep running?

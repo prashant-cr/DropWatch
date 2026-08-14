@@ -1,5 +1,5 @@
 {
-  "name": "price-watch",
+  "name": "dropwatch",
   "version": "0.1.0",
   "description": "Self-hosted price & availability watcher. Add a product URL, set a target price, get an email when it drops.",
   "keywords": [
@@ -15,8 +15,7 @@
     "node": ">=20"
   },
   "bin": {
-    "price-watch": "bin/pricewatch.js",
-    "pricewatch": "bin/pricewatch.js"
+    "dropwatch": "bin/dropwatch.js"
   },
   "files": [
     "bin",
@@ -76,10 +75,10 @@
   "author": "Prashant Suthar <sutharprashant199722@gmail.com>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/prashant-cr/PriceWatch.git"
+    "url": "git+https://github.com/prashant-cr/DropWatch.git"
   },
   "bugs": {
-    "url": "https://github.com/prashant-cr/PriceWatch/issues"
+    "url": "https://github.com/prashant-cr/DropWatch/issues"
   },
-  "homepage": "https://github.com/prashant-cr/PriceWatch#readme"
+  "homepage": "https://github.com/prashant-cr/DropWatch#readme"
 }

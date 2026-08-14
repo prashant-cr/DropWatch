@@ -98,7 +98,7 @@ function implausibleJump(watchId: number, price: number | null): string | null {
   if (price === null || price <= 0) return null;
 
   // Self-healing: once the reading has been rejected twice in a row it is not a
-  // one-off glitch — the store really did change, or PriceWatch was reading the
+  // one-off glitch — the store really did change, or DropWatch was reading the
   // wrong element before and has since been fixed. Believe the page and move on,
   // rather than staying wedged on a stale baseline forever. Two rejections also sit
   // just under the three-failure threshold, so the guard never triggers an email.
@@ -172,7 +172,7 @@ async function maybeAlert(watch: Watch, check: Check, extracted: ExtractResult):
 
   for (const result of results) {
     if (!result.ok) {
-      console.error(`[pricewatch] alert via ${result.channel} failed: ${result.error}`);
+      console.error(`[dropwatch] alert via ${result.channel} failed: ${result.error}`);
       continue;
     }
     recordAlert({
@@ -193,9 +193,9 @@ async function maybeAlertFailure(watch: Watch, check: Check, error: ScrapeError)
   const label = watch.label.trim() || hostLabel(watch.url);
   const advice =
     error.kind === 'blocked'
-      ? '\n\nThis site blocks automated checking. PriceWatch will not try to work around that — ' +
+      ? '\n\nThis site blocks automated checking. DropWatch will not try to work around that — ' +
         'check the page manually, or use the store’s own price-alert feature.'
-      : '\n\nPriceWatch will keep trying on the normal schedule.';
+      : '\n\nDropWatch will keep trying on the normal schedule.';
 
   const alert = {
     subject: `Check is failing — ${label}`,
@@ -205,7 +205,7 @@ async function maybeAlertFailure(watch: Watch, check: Check, error: ScrapeError)
   const results = await dispatchAlert({ kind: 'failure', watch, check, url: watch.url, ...alert });
   for (const result of results) {
     if (!result.ok) {
-      console.error(`[pricewatch] failure notice via ${result.channel} failed: ${result.error}`);
+      console.error(`[dropwatch] failure notice via ${result.channel} failed: ${result.error}`);
       continue;
     }
     recordAlert({

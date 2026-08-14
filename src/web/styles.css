@@ -12,7 +12,7 @@
 
   html {
     /* Inter when the user has it installed; otherwise the platform UI font.
-       No webfont request — PriceWatch runs offline. */
+       No webfont request — DropWatch runs offline. */
     font-family:
       'Inter',
       'Inter var',

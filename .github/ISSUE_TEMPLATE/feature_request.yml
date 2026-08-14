@@ -1,18 +1,18 @@
 name: Feature request
-description: Suggest something PriceWatch should do
+description: Suggest something DropWatch should do
 labels: [enhancement]
 body:
   - type: markdown
     attributes:
       value: |
-        PriceWatch tries to stay small and easy to run. The strongest requests explain
+        DropWatch tries to stay small and easy to run. The strongest requests explain
         the problem rather than the solution.
 
   - type: textarea
     id: problem
     attributes:
       label: What problem are you running into?
-      description: What are you trying to do that PriceWatch makes hard or impossible today?
+      description: What are you trying to do that DropWatch makes hard or impossible today?
     validations:
       required: true
 

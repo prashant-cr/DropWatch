@@ -47,7 +47,7 @@ export async function checkWatch(watchId: number, options: { immediate?: boolean
     return await runCheck(watch, options);
   } catch (error) {
     // runCheck is not supposed to throw; if it ever does, keep the loop alive.
-    console.error(`[pricewatch] check for watch ${watchId} threw:`, error);
+    console.error(`[dropwatch] check for watch ${watchId} threw:`, error);
     return null;
   } finally {
     running.delete(watchId);
@@ -76,7 +76,7 @@ export function scheduleWatch(watch: Watch): void {
 
   if (!cron.validate(watch.interval_cron)) {
     console.error(
-      `[pricewatch] watch ${watch.id} has an invalid schedule "${watch.interval_cron}"; not scheduled.`,
+      `[dropwatch] watch ${watch.id} has an invalid schedule "${watch.interval_cron}"; not scheduled.`,
     );
     return;
   }
@@ -89,7 +89,7 @@ export function scheduleWatch(watch: Watch): void {
           await sleep(jitterFor(watch.id));
           await checkWatch(watch.id);
         } catch (error) {
-          console.error(`[pricewatch] scheduled check for watch ${watch.id} failed:`, error);
+          console.error(`[dropwatch] scheduled check for watch ${watch.id} failed:`, error);
         }
       })();
     },
@@ -123,7 +123,7 @@ export function syncWatch(watchId: number): void {
 export function startScheduler(): void {
   stopScheduler();
   for (const watch of listWatches()) scheduleWatch(watch);
-  console.log(`[pricewatch] scheduled ${jobs.size} watch(es)`);
+  console.log(`[dropwatch] scheduled ${jobs.size} watch(es)`);
 }
 
 export function stopScheduler(): void {

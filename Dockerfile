@@ -1,5 +1,5 @@
 # Playwright's own image already carries Chromium and its system libraries, which is
-# the entire reason a PriceWatch container is worth having.
+# the entire reason a DropWatch container is worth having.
 FROM mcr.microsoft.com/playwright:v1.49.1-noble AS build
 
 WORKDIR /app
@@ -18,7 +18,7 @@ WORKDIR /app
 ENV NODE_ENV=production \
     PORT=3070 \
     HOST=0.0.0.0 \
-    PRICEWATCH_DATA_DIR=/data
+    DROPWATCH_DATA_DIR=/data
 
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist

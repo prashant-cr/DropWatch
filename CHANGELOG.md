@@ -67,7 +67,7 @@ First release: the MVP is feature-complete.
 - **Web UI** — card-grid dashboard, single-modal add-watch flow with live detection,
   watch detail page, light/dark mode, empty/loading/error states, toasts, and a mobile
   layout.
-- **Setup** — `npx price-watch` with automatic Chromium install, and a Docker image with
+- **Setup** — `npx dropwatch` with automatic Chromium install, and a Docker image with
   Chromium bundled.
 
 ### Security
@@ -77,11 +77,11 @@ First release: the MVP is feature-complete.
 
 ### Notes
 
-- PriceWatch detects when a site blocks automated checking and reports it, by design.
+- DropWatch detects when a site blocks automated checking and reports it, by design.
   It contains no CAPTCHA solving, anti-bot bypass, fingerprint spoofing or proxy
   rotation, and will not accept contributions adding them.
 - The minimum check interval is 15 minutes, enforced for preset and custom schedules
   alike.
 
-[unreleased]: https://github.com/prashant-cr/PriceWatch/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/prashant-cr/PriceWatch/releases/tag/v0.1.0
+[unreleased]: https://github.com/prashant-cr/DropWatch/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/prashant-cr/DropWatch/releases/tag/v0.1.0

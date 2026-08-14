@@ -157,7 +157,7 @@ export function AddWatchModal({
       open={open}
       onClose={saving ? () => undefined : onClose}
       title="Watch a product"
-      description="Paste a product URL — PriceWatch will find the name and price for you."
+      description="Paste a product URL — DropWatch will find the name and price for you."
       footer={
         <>
           <button type="button" className="btn-secondary" onClick={onClose} disabled={saving}>
