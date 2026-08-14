@@ -6,9 +6,10 @@
     "moduleResolution": "Bundler",
     "jsx": "react-jsx",
 
-    "baseUrl": ".",
+    // No baseUrl: it is deprecated in TypeScript 6 and removed in 7. Path mappings
+    // resolve relative to this file instead, which is what we wanted anyway.
     "paths": {
-      "@shared/*": ["src/shared/*"]
+      "@shared/*": ["./src/shared/*"]
     },
 
     "strict": true,

@@ -6,6 +6,29 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- **Dependency majors taken:** Tailwind CSS 4, Vite 8 (with `@vitejs/plugin-react` 6),
+  Recharts 3, nodemailer 9, TypeScript 6, and the GitHub Actions to v7. No user-facing
+  behaviour changes; the UI was rendered and compared before and after.
+- Tailwind's theme moved from `tailwind.config.js` into `@theme` in `src/web/styles.css`,
+  which is how v4 is configured. `autoprefixer` is gone — v4 prefixes on its own.
+- Dropped `baseUrl` from `tsconfig.json`; it is deprecated in TypeScript 6 and removed
+  in 7. Path mappings resolve relative to the config file instead.
+
+### Fixed
+
+- **Tests could abort the whole run instead of failing.** better-sqlite3 finalizing a
+  database handle on a worker thread races the teardown of that thread's V8
+  environment, which kills the worker with `Assertion failed: (env) != nullptr`. It
+  was intermittent and showed up first on Node 24. Vitest now runs each test file in
+  a forked process, where the native addon's teardown is well defined.
+
+### Notes
+
+- TypeScript 7 is held back: `typescript-eslint` 8.67.0 still requires
+  `typescript <6.1.0`, so 6.0.3 is the highest version compatible with typed linting.
+
 ## [0.2.0] — 2026-08-14
 
 Published to npm as **`dropwatch`**. The registry rejected `price-watch` as too

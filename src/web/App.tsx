@@ -37,7 +37,7 @@ export function App() {
 
   return (
     <div className="flex min-h-full flex-col">
-      <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-slate-50/85 backdrop-blur dark:border-white/10 dark:bg-[#0b0d10]/85">
+      <header className="sticky top-0 z-30 border-b border-slate-200/70 bg-slate-50/85 backdrop-blur-sm dark:border-white/10 dark:bg-[#0b0d10]/85">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6">
           <Link to="/" className="flex shrink-0 items-center gap-2">
             <LogoIcon className="h-7 w-7" />

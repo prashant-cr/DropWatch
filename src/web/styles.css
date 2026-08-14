@@ -1,6 +1,53 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+
+/* Tailwind 4 discovers classes by scanning from this file's directory. The UI all
+   lives under src/web, so point it there explicitly rather than relying on the
+   walk-up heuristic. */
+@source './';
+
+/* Replaces `darkMode: 'class'` from the old tailwind.config.js. useTheme puts the
+   .dark class on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* The theme is CSS now instead of a JS config object. Every custom value here was
+   carried over unchanged from tailwind.config.js. */
+@theme {
+  --color-accent-50: #ecfdf5;
+  --color-accent-100: #d1fae5;
+  --color-accent-200: #a7f3d0;
+  --color-accent-300: #6ee7b7;
+  --color-accent-400: #34d399;
+  --color-accent-500: #10b981;
+  --color-accent-600: #059669;
+  --color-accent-700: #047857;
+  --color-accent-800: #065f46;
+  --color-accent-900: #064e3b;
+
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  --animate-fade-in: fade-in 150ms ease-out;
+  --animate-slide-up: slide-up 200ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
 
 @layer base {
   :root {
@@ -37,33 +84,44 @@
     @apply bg-accent-500/25;
   }
 
+  /* `outline-hidden` is v4's name for what v3 called `outline-none`: it keeps an
+     invisible outline for forced-colors mode instead of removing it outright. */
   *:focus-visible {
-    @apply outline-none ring-2 ring-accent-500/60 ring-offset-2 ring-offset-slate-50 dark:ring-offset-[#0b0d10];
+    @apply outline-hidden ring-2 ring-accent-500/60 ring-offset-2 ring-offset-slate-50 dark:ring-offset-[#0b0d10];
   }
 }
 
 @layer components {
   .card {
-    @apply rounded-2xl border border-slate-200/80 bg-white shadow-sm
+    /* v4 renamed the two smallest shadows; `shadow-xs` is what `shadow-sm` drew in v3. */
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-xs
            dark:border-white/10 dark:bg-white/[0.03];
   }
 
-  .btn {
+  /* Shared button base. v4's `@apply` only takes utilities, not other custom
+     classes, so the variants list themselves here instead of each doing
+     `@apply btn`. */
+  .btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-ghost,
+  .btn-danger {
     @apply inline-flex select-none items-center justify-center gap-2 rounded-lg px-3.5 py-2
            text-sm font-medium transition disabled:pointer-events-none disabled:opacity-50;
   }
+
   .btn-primary {
-    @apply btn bg-accent-500 text-white hover:bg-accent-600 active:bg-accent-700;
+    @apply bg-accent-500 text-white hover:bg-accent-600 active:bg-accent-700;
   }
   .btn-secondary {
-    @apply btn border border-slate-200 bg-white text-slate-700 hover:bg-slate-50
+    @apply border border-slate-200 bg-white text-slate-700 hover:bg-slate-50
            dark:border-white/10 dark:bg-white/5 dark:text-slate-200 dark:hover:bg-white/10;
   }
   .btn-ghost {
-    @apply btn text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10;
+    @apply text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-white/10;
   }
   .btn-danger {
-    @apply btn bg-red-600 text-white hover:bg-red-700;
+    @apply bg-red-600 text-white hover:bg-red-700;
   }
 
   .input {
